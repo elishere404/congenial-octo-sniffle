@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Chat App</title>
+    <style>
+        @font-face {
+            font-family: ggsans;
+            src: url('https://cdn.glitch.global/dbec9639-c655-4f34-87e9-31a67504dadb/gg_sans_Regular%5B1%5D.ttf?v=1716922494473');
+        }
+        *{font-family: ggsans, sans-serif;}
+        body { font-family: ggsans, sans-serif; margin: 0; padding: 0; display: flex; flex-direction: column; height: 100vh; background-color: #f0f0f0; }
+        #user-info { padding: 10px; display: flex; align-items: center; border-bottom: 1px solid #ddd; background: white; }
+        #user-info img { border-radius: 50%; width: 40px; height: 40px; margin-right: 10px; }
+        #logout { margin-left: auto; padding: 10px; cursor: pointer; background: #f44336; color: white; border: none; border-radius: 4px; }
+        #logout:hover { background: #c0392b; }
+        #messages { list-style-type: none; margin: 0; padding: 0; overflow-y: auto; flex: 1; }
+        #messages li { padding: 8px; border-bottom: 1px solid #ddd; background: white; display: flex; justify-content: space-between; align-items: center; }
+        #message-form { display: flex; padding: 10px; background: white; border-top: 1px solid #ddd; }
+        #message-form input { flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 4px; }
+        #message-form button { padding: 10px; border: none; border-radius: 4px; background: #007BFF; color: white; cursor: pointer; margin-left: 10px; }
+        #message-form button:hover { background: #0056b3; }
+    </style>
+</head>
+<body>
+    <div id="user-info">
+        <img id="profile-pic" src="" alt="Profile Picture">
+        <span id="username"></span>
+        <button id="logout" onclick="logout()">Logout</button>
+    </div>
+    <ul id="messages"></ul>
+    <form id="message-form">
+        <input id="message-input" autocomplete="off" /><button>Send</button>
+    </form>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const socket = io();
+    
+        const form = document.getElementById('message-form');
+        const input = document.getElementById('message-input');
+        const messages = document.getElementById('messages');
+        const profilePic = document.getElementById('profile-pic');
+        const username = document.getElementById('username');
+        let currentUser;
+    
+        // Fetch user info from session
+        fetch('/session')
+            .then(response => response.json())
+            .then(data => {
+                profilePic.src = data.profilePic;
+                username.textContent = data.username;
+                currentUser = data.username;
+            });
+    
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            if (input.value) {
+                socket.emit('chat message', input.value);
+                input.value = '';
+            }
+        });
+    
+        socket.on('chat message', function(data) {
+            const item = document.createElement('li');
+            item.textContent = `${data.user}: ${data.msg}`;
+            item.dataset.user = data.user;
+            
+            if (data.user === currentUser) {
+                const deleteButton = document.createElement('button');
+                deleteButton.textContent = 'Delete';
+                deleteButton.onclick = () => {
+                    fetch(`/message/${data.id}`, { method: 'DELETE' })
+                        .then(response => {
+                            if (response.ok) {
+                                item.remove();
+                            } else {
+                                alert('Failed to delete message');
+                            }
+                        });
+                };
+                item.appendChild(deleteButton);
+            }
+    
+            messages.appendChild(item);
+            window.scrollTo(0, document.body.scrollHeight);
+        });
+    
+        socket.on('delete message', function(id) {
+            const messageItem = document.querySelector(`li[data-id="${id}"]`);
+            if (messageItem) {
+                messageItem.remove();
+            }
+        });
+    
+        function logout() {
+            window.location.href = '/logout';
+        }
+    </script>
+</body>
+</html>

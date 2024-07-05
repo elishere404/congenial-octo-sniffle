@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Login</title>
+    <style>
+                @font-face {
+            font-family: ggsans;
+            src: url('https://cdn.glitch.global/dbec9639-c655-4f34-87e9-31a67504dadb/gg_sans_Regular%5B1%5D.ttf?v=1716922494473');
+        }
+        *{font-family: ggsans, sans-serif;}
+        body { font-family: Arial, sans-serif; margin: 0; padding: 0; display: flex; justify-content: center; align-items: center; height: 100vh; background-color: #f0f0f0; }
+        form { display: flex; flex-direction: column; width: 90%; max-width: 400px; padding: 20px; background: white; border-radius: 8px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); }
+        input { margin-bottom: 10px; padding: 10px; border: 1px solid #ddd; border-radius: 4px; }
+        button { padding: 10px; border: none; border-radius: 4px; background: #007BFF; color: white; cursor: pointer; }
+        button:hover { background: #0056b3; }
+    </style>
+</head>
+<body>
+    <form action="/login" method="post" enctype="multipart/form-data">
+        <input type="text" name="username" placeholder="Username" required />
+        <input type="file" name="profilePic" accept="image/*" />
+        <label>
+            <input type="checkbox" name="keepLoggedIn" /> Keep me logged in
+        </label>
+        <button type="submit">Sign In</button>
+    </form>
+</body>
+</html>
